@@ -2,7 +2,7 @@
 
 This is a proof-of-concept for a (near-)zero-configuration Docker-and-.NET-aware monorepo build tool. There's currently a lot of sharp edges and strong assumptions about the project structure.
 
-## Instructions
+## Installation
 Install:
 
 ```bash
@@ -21,9 +21,11 @@ Next, add the following to your repository's `.gitignore`:
 image-tag
 ```
 
-Now run `mrpbuild` anywhere in the repository. For every project directory containing a `Dockerfile`, it will generate an `image-tag` file containing the tag of the built image.
+## Building images
+Run `mrpbuild` anywhere in the repository. For every project directory containing a `Dockerfile`, it will generate an `image-tag` file containing the tag of the built image.
 
-To actually deploy the projects to a cluster, you'll need to use other tooling that reads these `image-tag` files and updates the resource definitions in the cluster.
+## Deploying the built images
+To actually deploy the projects to a cluster, you'll need to use other tooling that reads these `image-tag` files and updates the resource definitions in the cluster. To make this easier, `mrpbuild` has the command `mrpbuild deploy`, which will run all `deploy.sh`-files found in the repository once the build completes.
 
 ## How does it work?
 It hashes all dependencies of a project directory by looking at the non-ignored files in that directory (and, for .NET projects, all projects referenced through `ProjectReference`s). That hash will become the image tag and will be written to the `image-tag` file in the same directory.
