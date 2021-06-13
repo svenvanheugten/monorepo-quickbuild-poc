@@ -72,7 +72,7 @@ def image_exists(image_tag):
         docker_client.images.get(image_tag)
         return True
     except docker.errors.ImageNotFound:
-        # TODO: Also check server
+        # TODO: Also check server (Or maybe only check server? Image might be built locally but not pushed)
         return False
 
 
@@ -98,6 +98,10 @@ if __name__ == '__main__':
             for line in builder:
                 if 'stream' in line:
                     print(line['stream'], end='')
+            pusher = docker_client.images.push(image_tag, stream=True, decode=True)
+            for line in pusher:
+                if 'status' in line:
+                    print(line['status'])
         else:
             print('Using cached {}...'.format(image_tag))
 
