@@ -54,7 +54,7 @@ def get_directory_dependencies(files, directory):
 
 
 def get_combined_hash(files):
-    return hashlib.sha256(','.join(f.filename + ':' + f.hash for f in files).encode('utf-8')).hexdigest()
+    return hashlib.sha256(','.join(sorted(f.filename + ':' + f.hash for f in files)).encode('utf-8')).hexdigest()
 
 
 def get_image_name(directory):
