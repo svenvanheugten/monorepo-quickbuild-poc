@@ -69,10 +69,16 @@ def write_image_tag(directory, image_tag):
 
 def image_exists(image_tag):
     try:
-        docker_client.images.get_registry_data(image_tag)
+        # TODO: Worry about the edge case where the image has been built but not pushed
+        docker_client.images.get(image_tag)
         return True
-    except docker.errors.NotFound:
-        return False
+    except docker.errors.ImageNotFound:
+        try:
+            # TODO: Find a faster way to do this...
+            docker_client.images.get_registry_data(image_tag)
+            return True
+        except docker.errors.NotFound:
+            return False
 
 
 if __name__ == '__main__':
