@@ -1,4 +1,5 @@
 import os
+import hashlib
 from filehash import FileHash
 from git import Git
 
@@ -31,8 +32,7 @@ def get_files():
     tracked_files = git.ls_files().split('\n')
     untracked_unignored_files = git.ls_files('--exclude-standard', '--others').split('\n')
     filenames = tracked_files + untracked_unignored_files
-    files = [File(f) for f in filenames]
-    return sorted(files, key=lambda f: f.filename)
+    return [File(f) for f in filenames]
 
 
 def get_directories_to_build(files):
@@ -45,10 +45,14 @@ def get_directory_dependencies(files, directory):
     return [f for f in files if f.in_directory(directory)]
 
 
+def get_combined_hash(files):
+    return hashlib.sha256(','.join(f.filename + ':' + f.hash for f in files).encode('utf-8')).hexdigest()
+
+
 if __name__ == '__main__':
     files = get_files()
     directories_to_build = get_directories_to_build(files)
 
     for directory in directories_to_build:
-        print(get_directory_dependencies(files, directory))
+        print(get_combined_hash(get_directory_dependencies(files, directory)))
 
