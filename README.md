@@ -1,4 +1,4 @@
-# quickbuild-poc
+# mrpbuild-poc
 
 This is a proof-of-concept for a (near-)zero-configuration Docker-and-.NET-aware monorepo build tool. There's currently a lot of sharp edges and strong assumptions about the project structure.
 
@@ -9,7 +9,7 @@ Install:
 python3 setup.py install
 ```
 
-In the root of your repository, create a file called `quickbuild.yaml` of the following form:
+In the root of your repository, create a file called `mrpbuild.yaml` of the following form:
 
 ```yaml
 imagePrefix: [container registry]/[namespace]/[repository]
@@ -21,7 +21,7 @@ Next, add the following to your repository's `.gitignore`:
 image-tag
 ```
 
-Now run `quickbuild` anywhere in the repository. For every project directory containing a `Dockerfile`, it will generate an `image-tag` file containing the tag of the built image.
+Now run `mrpbuild` anywhere in the repository. For every project directory containing a `Dockerfile`, it will generate an `image-tag` file containing the tag of the built image.
 
 To actually deploy the projects to a cluster, you'll need to use other tooling that reads these `image-tag` files and updates the resource definitions in the cluster.
 
