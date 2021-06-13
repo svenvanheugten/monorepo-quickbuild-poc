@@ -2,6 +2,7 @@ import os
 import sys
 import docker
 import hashlib
+import subprocess
 from filehash import FileHash
 import git
 
@@ -53,6 +54,10 @@ def get_directory_dependencies(files, directory):
     return [f for f in files if f.in_directory(directory)]
 
 
+def is_dotnet_project(files, directory):
+    return any(f for f in files if f.in_directory(directory) and f.filename.endswith('.csproj'))
+
+
 def get_combined_hash(files):
     return hashlib.sha256(','.join(sorted(f.filename + ':' + f.hash for f in files)).encode('utf-8')).hexdigest()
 
@@ -92,13 +97,17 @@ if __name__ == '__main__':
     directories_to_build = get_directories_to_build(files)
 
     for directory in directories_to_build:
-        combined_hash = get_combined_hash(get_directory_dependencies(files, directory))
+        dependencies = get_directory_dependencies(files, directory)
+        combined_hash = get_combined_hash(dependencies)
         image_name = get_image_name(directory)
         image_tag = '{}:build-{}'.format(image_name, combined_hash[:12])
         
         if not image_exists(image_tag):
             print('Building {}...'.format(image_tag))
             print()
+            if is_dotnet_project(files, directory):
+                process = subprocess.run(['dotnet', 'publish', '-c', 'Release', '-o', 'obj/Docker/publish'], cwd=directory)
+                process.check_returncode()
             builder = docker_client.api.build(path=directory, tag=image_tag, decode=True)
             for line in builder:
                 if 'stream' in line:
