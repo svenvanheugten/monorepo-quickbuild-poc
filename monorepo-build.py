@@ -1,11 +1,13 @@
 import os
 import sys
+import docker
 import hashlib
 from filehash import FileHash
 import git
 
 
 filehasher = FileHash()
+docker_client = docker.from_env()
 
 
 class File:
@@ -18,7 +20,7 @@ class File:
     @property
     def hash(self):
         if self.__hash is None:
-            self.__hash = filehasher.hash_file(self.filename)
+            self.__hash = filehasher.hash_file(self.filename)  # TODO: worry about line endings
         return self.__hash
 
     def in_directory(self, directory):
@@ -65,6 +67,15 @@ def write_image_tag(directory, image_tag):
         f.write(image_tag)
 
 
+def image_exists(image_tag):
+    try:
+        docker_client.images.get(image_tag)
+        return True
+    except docker.errors.ImageNotFound:
+        # TODO: Also check server
+        return False
+
+
 if __name__ == '__main__':
     os.chdir(get_working_tree_dir())
 
@@ -77,6 +88,18 @@ if __name__ == '__main__':
 
     for directory in directories_to_build:
         combined_hash = get_combined_hash(get_directory_dependencies(files, directory))
-        image_tag = '{}:{}'.format(get_image_name(directory), combined_hash)
+        image_name = get_image_name(directory)
+        image_tag = '{}:build-{}'.format(image_name, combined_hash[:12])
+        
+        if not image_exists(image_tag):
+            print('Building {}...'.format(image_tag))
+            print()
+            builder = docker_client.api.build(path=directory, tag=image_tag, decode=True)
+            for line in builder:
+                if 'stream' in line:
+                    print(line['stream'], end='')
+        else:
+            print('Using cached {}...'.format(image_tag))
+
         write_image_tag(directory, image_tag)
 
