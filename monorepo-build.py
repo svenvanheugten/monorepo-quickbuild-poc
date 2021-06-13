@@ -11,8 +11,14 @@ class File:
         self.filename = filename
         self.dirname = os.path.dirname(filename)
         self.basename = os.path.basename(filename)
-        self.hash = filehasher.hash_file(filename)
-    
+        self.__hash = None
+
+    @property
+    def hash(self):
+        if self.__hash is None:
+            self.__hash = filehasher.hash_file(self.filename)
+        return self.__hash
+
     def in_directory(self, directory):
         return os.path.commonpath([directory, self.filename]) == directory
 
