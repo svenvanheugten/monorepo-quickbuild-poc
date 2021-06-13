@@ -3,6 +3,7 @@ import sys
 import docker
 import hashlib
 import subprocess
+import yaml
 from filehash import FileHash
 import git
 
@@ -45,7 +46,7 @@ def get_files():
 
 
 def get_directories_to_build(files):
-    return [f.dirname for f in files if f.basename == 'image-name']
+    return [f.dirname for f in files if f.basename == 'build.yaml']
 
 
 def get_directory_dependencies(files, directory):
@@ -63,8 +64,8 @@ def get_combined_hash(files):
 
 
 def get_image_name(directory):
-    with open(os.path.join(directory, 'image-name'), 'r') as f:
-        return f.read().strip()
+    with open(os.path.join(directory, 'build.yaml'), 'r') as f:
+        return yaml.load(f, Loader=yaml.FullLoader)['imageName']
 
 
 def write_image_tag(directory, image_tag):
