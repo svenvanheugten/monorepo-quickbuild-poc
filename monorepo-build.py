@@ -2,7 +2,7 @@ import os
 import sys
 import hashlib
 from filehash import FileHash
-from git import Git
+import git
 
 
 filehasher = FileHash()
@@ -28,10 +28,15 @@ class File:
         return self.filename
 
 
+def get_working_tree_dir():
+    repo = git.Repo('.', search_parent_directories=True)
+    return repo.working_tree_dir
+
+
 def get_files():
-    git = Git()
-    tracked_files = git.ls_files().split('\n')
-    untracked_unignored_files = git.ls_files('--exclude-standard', '--others').split('\n')
+    git_client = git.Git()
+    tracked_files = git_client.ls_files().split('\n')
+    untracked_unignored_files = git_client.ls_files('--exclude-standard', '--others').split('\n')
     filenames = tracked_files + untracked_unignored_files
     return [File(f) for f in filenames]
 
@@ -56,8 +61,10 @@ def write_image_hash(directory, h):
 
 
 if __name__ == '__main__':
+    os.chdir(get_working_tree_dir())
+
     files = get_files()
-    
+
     if any(f.basename == 'image-hash' for f in files):
         sys.exit('image-hash needs to be in .gitignore')
     
