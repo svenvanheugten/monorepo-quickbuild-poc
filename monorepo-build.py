@@ -69,10 +69,9 @@ def write_image_tag(directory, image_tag):
 
 def image_exists(image_tag):
     try:
-        docker_client.images.get(image_tag)
+        docker_client.images.get_registry_data(image_tag)
         return True
-    except docker.errors.ImageNotFound:
-        # TODO: Also check server (Or maybe only check server? Image might be built locally but not pushed)
+    except docker.errors.NotFound:
         return False
 
 
