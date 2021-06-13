@@ -1,6 +1,6 @@
 # quickbuild-poc
 
-This is a proof-of-concept for a Docker-and-.NET-aware monorepo build tool. There's currently a lot of sharp edges and strong assumptions about the project structure.
+This is a proof-of-concept for a (near-)zero-configuration Docker-and-.NET-aware monorepo build tool. There's currently a lot of sharp edges and strong assumptions about the project structure.
 
 ## Instructions
 Install:
