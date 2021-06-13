@@ -128,7 +128,7 @@ def main():
             print('Building {}...'.format(image_name))
             print()
             if is_dotnet_project(files, directory):
-                process = subprocess.run(['dotnet', 'publish', '-c', 'Release', '-o', 'obj/Docker/publish'], cwd=directory)
+                process = subprocess.run(['dotnet', 'publish', '-c', 'Release', '-o', 'obj/Docker/publish'], cwd=os.path.abspath(directory))
                 process.check_returncode()
             builder = docker_client.api.build(path=directory, tag=image_tag, decode=True)
             for line in builder:
@@ -144,5 +144,10 @@ def main():
 
         write_image_tag(directory, image_tag)
 
-    print()
+    if len(sys.argv) > 1 and sys.argv[1] == 'deploy':
+        deploy_scripts = [f for f in files if f.basename == 'deploy.sh']
+
+        for s in deploy_scripts:
+            print('Running {}...'.format(s.filename))
+            subprocess.run(os.path.join('./', s.basename), cwd=os.path.abspath(s.dirname), shell=True).check_returncode()
 
