@@ -97,6 +97,7 @@ if __name__ == '__main__':
             for line in builder:
                 if 'stream' in line:
                     print(line['stream'], end='')
+            print()
             pusher = docker_client.images.push(image_tag, stream=True, decode=True)
             for line in pusher:
                 if 'status' in line:
