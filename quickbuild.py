@@ -119,7 +119,7 @@ if __name__ == '__main__':
         image_tag = '{}:build-{}'.format(image_name, combined_hash[:12])
         
         if not image_exists(image_tag):
-            print('Building {}...'.format(image_tag))
+            print('Building {}...'.format(image_name))
             print()
             if is_dotnet_project(files, directory):
                 process = subprocess.run(['dotnet', 'publish', '-c', 'Release', '-o', 'obj/Docker/publish'], cwd=directory)
@@ -134,7 +134,9 @@ if __name__ == '__main__':
                 if 'status' in line:
                     print(line['status'])
         else:
-            print('Using cached {}...'.format(image_tag))
+            print('Using cached {}...'.format(image_name))
 
         write_image_tag(directory, image_tag)
+
+    print()
 
