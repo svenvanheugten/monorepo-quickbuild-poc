@@ -41,6 +41,7 @@ def get_directories_to_build(files):
 
 def get_directory_dependencies(files, directory):
     # TODO: Get entire project tree
+    # TODO: Possibly prepare a structure that allows this to be done faster than iterating over all files
     return [f for f in files if f.in_directory(directory)]
 
 
