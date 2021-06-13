@@ -2,6 +2,7 @@ import os
 import sys
 import docker
 import hashlib
+import inflection
 import subprocess
 import yaml
 import xml.etree.ElementTree as ET
@@ -39,6 +40,11 @@ def get_working_tree_dir():
     return repo.working_tree_dir
 
 
+def get_config():
+    with open('quickbuild.yaml', 'r') as f:
+        return yaml.load(f, Loader=yaml.FullLoader)
+
+
 def get_files():
     git_client = git.Git()
     tracked_files = git_client.ls_files().split('\n')
@@ -48,7 +54,7 @@ def get_files():
 
 
 def get_directories_to_build(files):
-    return [f.dirname for f in files if f.basename == 'build.yaml']
+    return [f.dirname for f in files if f.basename == 'Dockerfile']
 
 
 def get_referenced_projects(files, directory):
@@ -76,11 +82,10 @@ def is_dotnet_project(files, directory):
 
 def get_combined_hash(files):
     return hashlib.sha256(','.join(sorted(f.filename + ':' + f.hash for f in files)).encode('utf-8')).hexdigest()
+        
 
-
-def get_image_name(directory):
-    with open(os.path.join(directory, 'build.yaml'), 'r') as f:
-        return yaml.load(f, Loader=yaml.FullLoader)['imageName']
+def get_image_name(config, directory):
+    return '{}/{}'.format(config['imagePrefix'], inflection.underscore(directory.replace('.', '')).replace('_', '-'))
 
 
 def write_image_tag(directory, image_tag):
@@ -105,6 +110,7 @@ def image_exists(image_tag):
 if __name__ == '__main__':
     os.chdir(get_working_tree_dir())
 
+    config = get_config()
     files = get_files()
 
     if any(f.basename == 'image-tag' for f in files):
@@ -115,7 +121,7 @@ if __name__ == '__main__':
     for directory in directories_to_build:
         dependencies = get_directory_dependencies(files, directory)
         combined_hash = get_combined_hash(dependencies)
-        image_name = get_image_name(directory)
+        image_name = get_image_name(config, directory)
         image_tag = '{}:build-{}'.format(image_name, combined_hash[:12])
         
         if not image_exists(image_tag):
