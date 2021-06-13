@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='monorepo-quickbuild-poc',
+    name='quickbuild-poc',
     packages=find_packages(),
     install_requires=['GitPython', 'docker', 'pyyaml', 'inflection'],
     entry_points={
