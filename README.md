@@ -4,7 +4,7 @@ This is a _proof-of-concept_ for a Docker-and-.NET-aware monorepo build tool. Th
 Install dependencies:
 
 ```bash
-pip3 install PythonGit docker
+pip3 install PythonGit docker pyyaml
 ```
 
 In every directory containing a `Dockerfile` in your monorepo, create a file called `build.yaml` of the following form:
