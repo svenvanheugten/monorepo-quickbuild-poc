@@ -1,4 +1,5 @@
 import os
+import sys
 import hashlib
 from filehash import FileHash
 from git import Git
@@ -49,10 +50,20 @@ def get_combined_hash(files):
     return hashlib.sha256(','.join(f.filename + ':' + f.hash for f in files).encode('utf-8')).hexdigest()
 
 
+def write_image_hash(directory, h):
+    with open(os.path.join(directory, 'image-hash'), 'w') as f:
+        f.write(h)
+
+
 if __name__ == '__main__':
     files = get_files()
+    
+    if any(f.basename == 'image-hash' for f in files):
+        sys.exit('image-hash needs to be in .gitignore')
+    
     directories_to_build = get_directories_to_build(files)
 
     for directory in directories_to_build:
-        print(get_combined_hash(get_directory_dependencies(files, directory)))
+        combined_hash = get_combined_hash(get_directory_dependencies(files, directory))
+        write_image_hash(directory, combined_hash)
 
