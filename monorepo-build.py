@@ -5,11 +5,9 @@ import hashlib
 import subprocess
 import yaml
 import xml.etree.ElementTree as ET
-from filehash import FileHash
 import git
 
 
-filehasher = FileHash()
 docker_client = docker.from_env()
 
 
@@ -23,7 +21,10 @@ class File:
     @property
     def hash(self):
         if self.__hash is None:
-            self.__hash = filehasher.hash_file(self.filename)  # TODO: worry about line endings
+            with open(self.filename, 'rb') as f:
+                # Remove carriage returns to ignore differences in autocrlf settings and platforms
+                # TODO: don't destroy binary files by removing carriage return characters
+                self.__hash = hashlib.sha256(f.read().replace(b'\r', b'')).hexdigest()
         return self.__hash
 
     def in_directory(self, directory):
