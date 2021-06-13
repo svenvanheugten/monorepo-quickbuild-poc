@@ -4,6 +4,7 @@ import docker
 import hashlib
 import subprocess
 import yaml
+import xml.etree.ElementTree as ET
 from filehash import FileHash
 import git
 
@@ -49,10 +50,23 @@ def get_directories_to_build(files):
     return [f.dirname for f in files if f.basename == 'build.yaml']
 
 
+def get_referenced_projects(files, directory):
+    csproj_files = [f for f in files if f.in_directory(directory) and f.filename.endswith('.csproj')]
+    if not csproj_files:
+        return []
+    if len(csproj_files) != 1:
+        raise Exception("nope")
+    with open(csproj_files[0].filename, 'r') as f:
+        tree = ET.fromstring(f.read())
+        all_project_references = tree.findall('.//ProjectReference')
+        for project_ref in all_project_references:
+            yield os.path.dirname(os.path.normpath(os.path.join(directory, project_ref.attrib['Include'].replace('\\', '/'))))
+
+
 def get_directory_dependencies(files, directory):
-    # TODO: Get entire project tree
     # TODO: Possibly prepare a structure that allows this to be done faster than iterating over all files
-    return [f for f in files if f.in_directory(directory)]
+    # TODO: Detect infinite recursion
+    return [f for f in files if f.in_directory(directory)] + [x for ref in get_referenced_projects(files, directory) for x in get_directory_dependencies(files, ref)]
 
 
 def is_dotnet_project(files, directory):
@@ -60,7 +74,7 @@ def is_dotnet_project(files, directory):
 
 
 def get_combined_hash(files):
-    return hashlib.sha256(','.join(sorted(f.filename + ':' + f.hash for f in files)).encode('utf-8')).hexdigest()
+    return hashlib.sha256(','.join(sorted(set(f.filename + ':' + f.hash for f in files))).encode('utf-8')).hexdigest()
 
 
 def get_image_name(directory):
