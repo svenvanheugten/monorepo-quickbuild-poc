@@ -55,9 +55,14 @@ def get_combined_hash(files):
     return hashlib.sha256(','.join(f.filename + ':' + f.hash for f in files).encode('utf-8')).hexdigest()
 
 
-def write_image_hash(directory, h):
-    with open(os.path.join(directory, 'image-hash'), 'w') as f:
-        f.write(h)
+def get_image_name(directory):
+    with open(os.path.join(directory, 'image-name'), 'r') as f:
+        return f.read().strip()
+
+
+def write_image_tag(directory, image_tag):
+    with open(os.path.join(directory, 'image-tag'), 'w') as f:
+        f.write(image_tag)
 
 
 if __name__ == '__main__':
@@ -65,12 +70,13 @@ if __name__ == '__main__':
 
     files = get_files()
 
-    if any(f.basename == 'image-hash' for f in files):
-        sys.exit('image-hash needs to be in .gitignore')
+    if any(f.basename == 'image-tag' for f in files):
+        sys.exit('image-tag needs to be in .gitignore')
     
     directories_to_build = get_directories_to_build(files)
 
     for directory in directories_to_build:
         combined_hash = get_combined_hash(get_directory_dependencies(files, directory))
-        write_image_hash(directory, combined_hash)
+        image_tag = '{}:{}'.format(get_image_name(directory), combined_hash)
+        write_image_tag(directory, image_tag)
 
