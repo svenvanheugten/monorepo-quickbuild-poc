@@ -3,10 +3,10 @@
 This is a proof-of-concept for a Docker-and-.NET-aware monorepo build tool. There's currently a lot of sharp edges and strong assumptions about the project structure.
 
 ## Instructions
-Install dependencies:
+Install:
 
 ```bash
-pip3 install PythonGit docker pyyaml inflection
+python3 setup.py install
 ```
 
 In the root of your repository, create a file called `quickbuild.yaml` of the following form:
@@ -21,7 +21,7 @@ Next, add the following to your repository's `.gitignore`:
 image-tag
 ```
 
-Now run `python3 quickbuild.py` anywhere in the repository. For every project directory containing a `Dockerfile`, it will generate an `image-tag` file containing the tag of the built image.
+Now run `quickbuild` anywhere in the repository. For every project directory containing a `Dockerfile`, it will generate an `image-tag` file containing the tag of the built image.
 
 To actually deploy the projects to a cluster, you'll need to use other tooling that reads these `image-tag` files and updates the resource definitions in the cluster.
 

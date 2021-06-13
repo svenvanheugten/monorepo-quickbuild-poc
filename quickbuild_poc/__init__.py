@@ -107,7 +107,7 @@ def image_exists(image_tag):
             return False
 
 
-if __name__ == '__main__':
+def main():
     os.chdir(get_working_tree_dir())
 
     config = get_config()
