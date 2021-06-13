@@ -41,7 +41,7 @@ def get_working_tree_dir():
 
 
 def get_config():
-    with open('quickbuild.yaml', 'r') as f:
+    with open('mrpbuild.yaml', 'r') as f:
         return yaml.load(f, Loader=yaml.FullLoader)
 
 
